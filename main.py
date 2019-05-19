@@ -21,7 +21,8 @@
 '''
 
 from socket import socket, AF_INET, SOCK_STREAM
-from time import time
+from time import time, ctime
+from curses import *
 
 HOST = 'localhost'
 PORT = 10001
@@ -47,4 +48,13 @@ with socket(AF_INET, SOCK_STREAM) as sock:
 d = (tz-tx)/2
 lty = tx+d;
 delta = ty - lty;
-print(f'tx = {tx}\nty = {ty}\ntz = {tz}\ndelta = {delta*1000} \N{PLUS-MINUS SIGN}{d*1000} ms')
+def main(stdscr):
+    stdscr.erase()
+    stdscr.refresh()
+    stdscr.addstr(f'tx = {tx}\nty = {ty}\ntz = {tz}\ndelta = {delta*1000} \N{PLUS-MINUS SIGN}{d*1000} ms\n')
+    beg = stdscr.getyx()
+    while True:
+        stdscr.move(*beg)
+        stdscr.addstr('Your local time: ' + ctime() + '\nRemote time:     ' + ctime(time()+delta))
+        stdscr.refresh()
+wrapper(main)
