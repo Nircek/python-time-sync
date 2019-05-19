@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 '''
     python-time-sync
 
@@ -16,3 +19,32 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
+
+from socket import socket, AF_INET, SOCK_STREAM
+from time import time
+
+HOST = 'localhost'
+PORT = 10001
+
+with socket(AF_INET, SOCK_STREAM) as sock:
+    sock.connect((HOST, PORT))
+    sock.send(b'r')
+    while sock.recv(1) != b'R':
+        pass
+    tx = time()
+    sock.send(b'p')
+    while sock.recv(1) != b'P':
+        pass
+    tz = time()
+    sock.send(b't')
+    while sock.recv(1) != b'T':
+        pass
+    ty = float(int.from_bytes(sock.recv(8), 'little'))
+    ty += int.from_bytes(sock.recv(4), 'little')/10**9
+    sock.send(b'c')
+    while sock.recv(1) != b'C':
+        pass
+d = (tz-tx)/2
+lty = tx+d;
+delta = ty - lty;
+print(f'tx = {tx}\nty = {ty}\ntz = {tz}\ndelta = {delta*1000} \N{PLUS-MINUS SIGN}{d*1000} ms')
